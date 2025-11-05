@@ -42,17 +42,62 @@ export default function Home() {
   const handleDownload = async () => {
     if (!imageRef.current) return;
     
-    const html2canvas = (await import('html2canvas')).default;
-    const canvas = await html2canvas(imageRef.current, {
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null
-    });
+    // Create a new image element to load the source
+    const img = new window.Image();
+    img.crossOrigin = 'anonymous';
+    img.src = '/normie-meme.jpg';
     
-    const link = document.createElement('a');
-    link.download = 'normie-meme.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    img.onload = () => {
+      // Create canvas with image dimensions
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      
+      // Draw the base image
+      ctx.drawImage(img, 0, 0);
+      
+      // Function to draw text with background
+      const drawText = (text, xPercent, yPercent) => {
+        const x = (canvas.width * xPercent) / 100;
+        const y = (canvas.height * yPercent) / 100;
+        
+        // Set font
+        ctx.font = 'bold 16px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Measure text
+        const metrics = ctx.measureText(text);
+        const textWidth = metrics.width;
+        const textHeight = 20;
+        const padding = 12;
+        
+        // Draw white background
+        ctx.fillStyle = 'white';
+        ctx.fillRect(
+          x - textWidth / 2 - padding / 2,
+          y - textHeight / 2 - padding / 2,
+          textWidth + padding,
+          textHeight + padding
+        );
+        
+        // Draw text
+        ctx.fillStyle = 'black';
+        ctx.fillText(text, x, y);
+      };
+      
+      // Draw all text overlays
+      if (text1) drawText(text1, pos1.x, pos1.y);
+      if (text2) drawText(text2, pos2.x, pos2.y);
+      if (text3) drawText(text3, pos3.x, pos3.y);
+      
+      // Download
+      const link = document.createElement('a');
+      link.download = 'normie-meme.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    };
   };
 
   return (
@@ -61,6 +106,19 @@ export default function Home() {
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
     >
+      <div className="absolute top-4 left-4 text-gray-800 text-sm">
+        I am retared
+      </div>
+      
+      <a 
+        href="https://x.com/techMellouk" 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="absolute top-4 right-4 text-gray-800 text-sm hover:underline"
+      >
+        x.com/techMellouk
+      </a>
+      
       <div className="flex gap-8 items-start max-w-7xl">
         {/* Image container with text overlays */}
         <div className="relative" ref={imageRef}>
