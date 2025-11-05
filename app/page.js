@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useState, useRef } from "react";
 
 export default function Home() {
-  const [text1, setText1] = useState("");
-  const [text2, setText2] = useState("");
-  const [text3, setText3] = useState("");
+  const [text1, setText1] = useState("I am retared");
+  const [text2, setText2] = useState("i am smart");
+  const [text3, setText3] = useState("I am retarted");
   
   const [pos1, setPos1] = useState({ x: 15, y: 15 });
   const [pos2, setPos2] = useState({ x: 50, y: 15 });
@@ -19,12 +19,12 @@ export default function Home() {
     setDragging(index);
   };
 
-  const handleMouseMove = (e) => {
+  const handleMove = (clientX, clientY) => {
     if (dragging === null || !imageRef.current) return;
     
     const rect = imageRef.current.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
     
     // Keep within bounds
     const clampedX = Math.max(0, Math.min(100, x));
@@ -35,7 +35,22 @@ export default function Home() {
     if (dragging === 3) setPos3({ x: clampedX, y: clampedY });
   };
 
+  const handleMouseMove = (e) => {
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length > 0) {
+      e.preventDefault();
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
   const handleMouseUp = () => {
+    setDragging(null);
+  };
+
+  const handleTouchEnd = () => {
     setDragging(null);
   };
 
@@ -102,11 +117,13 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen flex items-center justify-center bg-gray-100 p-8"
+      className="min-h-screen flex items-center justify-center bg-gray-100 p-4 md:p-8 pt-16 md:pt-8"
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      <div className="absolute top-4 left-4 text-gray-800 text-sm">
+      <div className="absolute top-4 left-4 text-gray-800 text-xs md:text-sm">
         I am retared
       </div>
       
@@ -114,14 +131,14 @@ export default function Home() {
         href="https://x.com/techMellouk" 
         target="_blank" 
         rel="noopener noreferrer"
-        className="absolute top-4 right-4 text-gray-800 text-sm hover:underline"
+        className="absolute top-4 right-4 text-gray-800 text-xs md:text-sm hover:underline"
       >
         x.com/techMellouk
       </a>
       
-      <div className="flex gap-8 items-start max-w-7xl">
+      <div className="flex flex-col md:flex-row gap-4 md:gap-8 items-start md:items-start w-full max-w-7xl">
         {/* Image container with text overlays */}
-        <div className="relative" ref={imageRef}>
+        <div className="relative w-full md:w-auto" ref={imageRef}>
           <Image 
             src="/normie-meme.jpg" 
             alt="Meme" 
@@ -133,13 +150,14 @@ export default function Home() {
           {/* Text overlays - draggable */}
           {text1 && (
             <div 
-              className="absolute bg-white px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500"
+              className="absolute bg-white px-2 md:px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500 text-xs md:text-base touch-none"
               style={{ 
                 left: `${pos1.x}%`, 
                 top: `${pos1.y}%`,
                 transform: 'translate(-50%, -50%)'
               }}
               onMouseDown={() => handleMouseDown(1)}
+              onTouchStart={() => handleMouseDown(1)}
             >
               {text1}
             </div>
@@ -147,13 +165,14 @@ export default function Home() {
           
           {text2 && (
             <div 
-              className="absolute bg-white px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500"
+              className="absolute bg-white px-2 md:px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500 text-xs md:text-base touch-none"
               style={{ 
                 left: `${pos2.x}%`, 
                 top: `${pos2.y}%`,
                 transform: 'translate(-50%, -50%)'
               }}
               onMouseDown={() => handleMouseDown(2)}
+              onTouchStart={() => handleMouseDown(2)}
             >
               {text2}
             </div>
@@ -161,13 +180,14 @@ export default function Home() {
           
           {text3 && (
             <div 
-              className="absolute bg-white px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500"
+              className="absolute bg-white px-2 md:px-3 py-1 rounded font-bold text-center whitespace-nowrap cursor-move hover:ring-2 hover:ring-blue-500 text-xs md:text-base touch-none"
               style={{ 
                 left: `${pos3.x}%`, 
                 top: `${pos3.y}%`,
                 transform: 'translate(-50%, -50%)'
               }}
               onMouseDown={() => handleMouseDown(3)}
+              onTouchStart={() => handleMouseDown(3)}
             >
               {text3}
             </div>
@@ -175,7 +195,7 @@ export default function Home() {
         </div>
 
         {/* Input boxes on the right */}
-        <div className="flex flex-col gap-4 min-w-[250px]">
+        <div className="flex flex-col gap-4 w-full md:min-w-[250px] md:w-auto">
           <div>
             <label htmlFor="text1" className="block text-sm font-medium text-gray-700 mb-2">
               Left Avatar Text
@@ -185,7 +205,7 @@ export default function Home() {
               type="text"
               value={text1}
               onChange={(e) => setText1(e.target.value)}
-              placeholder="Enter text for left avatar"
+              placeholder="Enter text"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -199,7 +219,7 @@ export default function Home() {
               type="text"
               value={text2}
               onChange={(e) => setText2(e.target.value)}
-              placeholder="Enter text for middle avatar"
+              placeholder="Enter text"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
